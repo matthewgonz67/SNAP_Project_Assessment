@@ -1,30 +1,63 @@
 <!doctype html>
 <html>
   <head>
-    <title>LA TV Shows | Home</title>
-    <meta name="description" content="A Catalog of Shows Set in Los Angeles" />
+    <!-- CHANGE TITLE -->
+    <title>Best Hikes in SoCal</title>
+    <meta name="description" content="A Catalog of SoCal's Best Hikes" />
     <link rel="stylesheet" href="style.css" />
+    <script src="peaks.js"></script>
     <script type="text/javascript" src="scripts.js"></script>
   </head>
 
   <body>
     <header class="main-header">
-      <h1 class="title">LA TV Shows</h1>
+      <h1 class="title">SoCal's Best Hikes!</h1>
+      <p id="hikes-description" class="subtitle"></p>
     </header>
+
+    <div class="controls-section">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search by hike name or location..." onkeyup="searchHikes()">
+      </div>
+
+      <details class="filter-dropdown">
+        <summary>Filter by Features</summary>
+        <div id="checkbox-container">
+          <label><input type="checkbox" value="scenic" onchange="FilterSort()"> Scenic</label><br>
+          <label><input type="checkbox" value="grueling" onchange="FilterSort()"> Grueling</label><br>
+          <label><input type="checkbox" value="water" onchange="FilterSort()"> Water</label><br>
+          <label><input type="checkbox" value="peak" onchange="FilterSort()"> Peak</label>
+        </div>
+      </details>
+
+      <div class="sort-group">
+        <select id="sort-select" onchange="FilterSort()">
+          <option value="none">Sort By...</option>
+          <option value="dist-asc">Distance: Low to High</option>
+          <option value="dist-desc">Distance: High to Low</option>
+          <option value="elev-asc">Elevation: Low to High</option>
+          <option value="elev-desc">Elevation: High to Low</option>
+        </select>
+      </div>
+
+      <button onclick="randomHike()">I'm Feeling Lucky!</button>
+      <button onclick="resetHikes()">Reset All</button>
+
+    </div>
+
     <div id="card-container"></div>
     <div class="card" style="display: none">
       <div class="card-content">
-        <h2>TV Show Title</h2>
-        <img src="" alt="TV Show Poster" />
+        <h2>Hike name</h2>
         <ul>
-          <li>Bullet Point 1</li>
-          <li>Bullet Point 2</li>
-          <li>Bullet Point 3</li>
+          <li>Distance</li>
+          <li>Elevation Gain</li>
+          <li>Location</li>
         </ul>
       </div>
+      <img src="" alt="Hike photo" class="hike-image">
     </div>
     <div class="footer">
-      <button onclick="quoteAlert()">Get A Quote!</button>
       <button onclick="removeLastCard()">Remove A Card!</button>
     </div>
   </body>

@@ -23,75 +23,133 @@
  *
  */
 
-const FRESH_PRINCE_URL =
-  "https://upload.wikimedia.org/wikipedia/en/3/33/Fresh_Prince_S1_DVD.jpg";
-const CURB_POSTER_URL =
-  "https://m.media-amazon.com/images/M/MV5BZDY1ZGM4OGItMWMyNS00MDAyLWE2Y2MtZTFhMTU0MGI5ZDFlXkEyXkFqcGdeQXVyMDc5ODIzMw@@._V1_FMjpg_UX1000_.jpg";
-const EAST_LOS_HIGH_POSTER_URL =
-  "https://static.wikia.nocookie.net/hulu/images/6/64/East_Los_High.jpg";
-
-// This is an array of strings (TV show titles)
-let titles = [
-  "Fresh Prince of Bel Air",
-  "Curb Your Enthusiasm",
-  "East Los High",
-];
-// Your final submission should have much more data than this, and
-// you should use more than just an array of strings to store it all.
+function updateDescription(count) {
+  const description = document.getElementById("hikes-description");
+  if (!description) {
+    return;
+  }
+  description.textContent = count + " of SoCal's best hikes tailored FOR YOU by Matthew Gonzalez";
+}
 
 // This function adds cards the page to display the data in the array
 function showCards() {
   const cardContainer = document.getElementById("card-container");
   cardContainer.innerHTML = "";
   const templateCard = document.querySelector(".card");
-
-  for (let i = 0; i < titles.length; i++) {
-    let title = titles[i];
-
-    // This part of the code doesn't scale very well! After you add your
-    // own data, you'll need to do something totally different here.
-    let imageURL = "";
-    if (i == 0) {
-      imageURL = FRESH_PRINCE_URL;
-    } else if (i == 1) {
-      imageURL = CURB_POSTER_URL;
-    } else if (i == 2) {
-      imageURL = EAST_LOS_HIGH_POSTER_URL;
-    }
-
+  for (let i = 0; i < hikes.length; i++) {
+    let hike = hikes[i];
     const nextCard = templateCard.cloneNode(true); // Copy the template card
-    editCardContent(nextCard, title, imageURL); // Edit title and image
+    editCardContent(nextCard, hike); // Edit card
     cardContainer.appendChild(nextCard); // Add new card to the container
   }
+  updateDescription(hikes.length); //update the description to show the number of hikes in the array
 }
 
-function editCardContent(card, newTitle, newImageURL) {
-  card.style.display = "block";
+function showCardsLimited(hikeList){ //function to show an array of hikes, will allow me to show limited hieks rather than complete list because of parameter
+  //same exact fuinction as previous functio but just with a optional parameter
+  const cardContainer = document.getElementById("card-container");
+  cardContainer.innerHTML = "";
+  const templateCard = document.querySelector(".card");
+  for (let i = 0; i < hikeList.length; i++) {
+    let hike = hikeList[i];
+    const nextCard = templateCard.cloneNode(true); // Copy the template card
+    editCardContent(nextCard, hike); // Edit card
+    cardContainer.appendChild(nextCard); // Add new card to the container
+  }
+  updateDescription(hikeList.length);
+}
 
+function FilterSort() {
+  //filter through tags
+  const checkedBoxes = document.querySelectorAll('#checkbox-container input:checked'); //find all checked boxes within the filter tags
+  let temptags = [];
+  for(let i = 0; i < checkedBoxes.length; i++){
+    temptags[i] = checkedBoxes[i].value; //add the values or tags of the checked boxes to an array because its intially stored in a nodelist
+  }
+  let hikeList = hikes.filter(h => { //loop through every tag
+    return temptags.every(tag => h.tags.includes(tag)); //appends hike if every tag in temp tags is contained in the hike's tags
+  });
+
+  //sort ascending or descending
+  const sortValue = document.getElementById("sort-select").value;
+  if (sortValue === "dist-asc") {
+    hikeList.sort((a, b) => a.distance - b.distance);
+  } else if (sortValue === "dist-desc") {
+    hikeList.sort((a, b) => b.distance - a.distance);
+  } else if (sortValue === "elev-asc") {
+    hikeList.sort((a, b) => a.elevationGain - b.elevationGain);
+  } else if (sortValue === "elev-desc") {
+    hikeList.sort((a, b) => b.elevationGain - a.elevationGain);
+  }
+
+  //display new lsit
+  showCardsLimited(hikeList);
+}
+
+function randomHike(){
+  const randomIndex = Math.floor(Math.random() * hikes.length); //will return an integer between 1 and hikes.length
+  const hike = hikes[randomIndex]; //find the value in our array of hikes
+  showCardsLimited([hike]); //put value in an array and display it
+}
+
+function resetHikes() {
+  const searchInput = document.getElementById("search-input"); //clear search bar
+  if (searchInput) { //check if theres a value in search input
+    searchInput.value = "";
+  }
+  const allCheckboxes = document.querySelectorAll('#checkbox-container input[type="checkbox"]');
+  allCheckboxes.forEach(box => {
+    box.checked = false; //uncheck all boxes
+  });
+  const sortSelect = document.getElementById("sort-select");
+  if (sortSelect) {
+    sortSelect.value = "none"; //reset sort
+  }
+
+  showCards(); //display original list
+}
+
+function searchHikes(){
+  const searchVal = document.getElementById("search-input").value.toLowerCase(); //save value stored in search-input and make it lower case
+  const allCheckboxes = document.querySelectorAll('#checkbox-container input[type="checkbox"]');
+  allCheckboxes.forEach(box => {
+    box.checked = false; //uncheck all boxes
+  });
+  const sortSelect = document.getElementById("sort-select");
+  if (sortSelect) {
+    sortSelect.value = "none"; //reset sort
+  }
+  let hikeList = hikes.filter(h => {
+    const nameMatch = h.name.toLowerCase().includes(searchVal); //see if any hike's names match with our stored value
+    const locationMatch = h.location.toLowerCase().includes(searchVal);
+    return nameMatch || locationMatch;
+  })
+  showCardsLimited(hikeList);
+}
+
+function editCardContent(card, hike) {
+  card.style.display = "flex";
   const cardHeader = card.querySelector("h2");
-  cardHeader.textContent = newTitle;
+  cardHeader.textContent = hike.name;
+  const listItems = card.querySelectorAll("li");
+  listItems[0].textContent = `Distance: ${hike.distance} miles`;
+  listItems[1].textContent = `Elevation: ${hike.elevationGain} ft`;
+  listItems[2].textContent = `Location: ${hike.location}`;
 
   const cardImage = card.querySelector("img");
-  cardImage.src = newImageURL;
-  cardImage.alt = newTitle + " Poster";
+  cardImage.src = hike.image;
+  cardImage.alt = "Photo of " + hike.name;
 
   // You can use console.log to help you debug!
   // View the output by right clicking on your website,
   // select "Inspect", then click on the "Console" tab
-  console.log("new card:", newTitle, "- html: ", card);
+  console.log("new card:", hike.name, "- html: ", card);
 }
 
 // This calls the addCards() function when the page is first loaded
 document.addEventListener("DOMContentLoaded", showCards);
 
-function quoteAlert() {
-  console.log("Button Clicked!");
-  alert(
-    "I guess I can kiss heaven goodbye, because it got to be a sin to look this good!",
-  );
-}
-
 function removeLastCard() {
-  titles.pop(); // Remove last item in titles array
+  hikes.pop(); // Remove last item in titles array
   showCards(); // Call showCards again to refresh
 }
